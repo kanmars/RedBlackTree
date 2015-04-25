@@ -1,0 +1,70 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BLACK	rbt_1.c	/^const int BLACK = 1;$/;"	v
+BLACK	rbt_3.c	9;"	d	file:
+COLOR	rbt_3.c	/^typedef int COLOR;$/;"	t	file:
+ERR	rbt_3.c	12;"	d	file:
+LEFT	rbt_3.c	20;"	d	file:
+LR	rbt_3.c	19;"	d	file:
+NO	rbt_3.c	17;"	d	file:
+OK	rbt_3.c	11;"	d	file:
+RED	rbt_1.c	/^const int RED = 0;$/;"	v
+RED	rbt_3.c	8;"	d	file:
+RES	rbt_3.c	13;"	d	file:
+RIGHT	rbt_3.c	21;"	d	file:
+UNKNOWN	rbt_3.c	22;"	d	file:
+YES	rbt_3.c	16;"	d	file:
+boolean	rbt_3.c	15;"	d	file:
+clock_wise	rbt_1.c	/^rb_node* clock_wise(rb_node* node){$/;"	f
+color	rbt_3.c	/^	COLOR color;$/;"	m	struct:node	file:
+colour	rbt_1.c	/^    int key, colour;$/;"	m	struct:rb_node	file:
+counter_clock_wise	rbt_1.c	/^rb_node* counter_clock_wise(rb_node* node){$/;"	f
+getGrandFather	rbt_3.c	/^node * getGrandFather(node * n)$/;"	f
+getLR	rbt_3.c	/^LR getLR(node * n)$/;"	f
+getParent	rbt_3.c	/^node * getParent(node *n)$/;"	f
+getUncle	rbt_3.c	/^node * getUncle(node * n)$/;"	f
+get_node	rbt_1.c	/^rb_node* get_node(rb_node* parent, int key){$/;"	f
+info	rbt_3.c	/^int info(char * str){$/;"	f
+infox	rbt_3.c	/^int infox(int argc,...)$/;"	f
+isLeft	rbt_3.c	/^boolean isLeft(node * n)$/;"	f
+isRight	rbt_3.c	/^boolean isRight(node * n)$/;"	f
+key	rbt_1.c	/^    int key, colour;$/;"	m	struct:rb_node	file:
+key	rbt_3.c	/^	int key;$/;"	m	struct:node	file:
+lchild	rbt_1.c	/^    rb_node* lchild, *rchild, *parent;$/;"	m	struct:rb_node	file:
+left	rbt_3.c	/^	node * parent,* left,* right;$/;"	m	struct:node	file:
+main	rbt_1.c	/^int main(){$/;"	f
+main	rbt_3.c	/^int main(int argc,char ** argv)$/;"	f
+node	rbt_3.c	/^struct node{$/;"	s	file:
+node	rbt_3.c	/^typedef struct node node;$/;"	t	typeref:struct:node	file:
+nodeCreate	rbt_3.c	/^node * nodeCreate()$/;"	f
+nodeDestory	rbt_3.c	/^void nodeDestory(node * oneNode)$/;"	f
+nodeDestoryRecursion	rbt_3.c	/^void nodeDestoryRecursion(node * oneNode)$/;"	f
+nodeSearch	rbt_3.c	/^node * nodeSearch(rbt * r,int k)$/;"	f
+nodeShowRecursion	rbt_3.c	/^void nodeShowRecursion(node * n)$/;"	f
+nodeShowRecursion_2	rbt_3.c	/^void nodeShowRecursion_2(node * n)$/;"	f
+parent	rbt_1.c	/^    rb_node* lchild, *rchild, *parent;$/;"	m	struct:rb_node	file:
+parent	rbt_3.c	/^	node * parent,* left,* right;$/;"	m	struct:node	file:
+rb_delete	rbt_1.c	/^void rb_delete(int key){$/;"	f
+rb_insert	rbt_1.c	/^void rb_insert(int key){$/;"	f
+rb_node	rbt_1.c	/^struct rb_node{$/;"	s	file:
+rb_node	rbt_1.c	/^typedef struct rb_node rb_node;$/;"	t	typeref:struct:rb_node	file:
+rb_search	rbt_1.c	/^rb_node* rb_search(int key){$/;"	f
+rbt	rbt_3.c	/^typedef struct root_node rbt;$/;"	t	typeref:struct:root_node	file:
+rbtAdd	rbt_3.c	/^int rbtAdd(rbt * r , int k, int v)$/;"	f
+rbtAddBalance	rbt_3.c	/^RES rbtAddBalance(rbt * r, node * n)$/;"	f
+rbtCreate	rbt_3.c	/^rbt * rbtCreate()$/;"	f
+rbtDel	rbt_3.c	/^RES rbtDel(rbt * r,int k)$/;"	f
+rbtDelBalance	rbt_3.c	/^RES rbtDelBalance(rbt * r, node * n)$/;"	f
+rbtDestory	rbt_3.c	/^void rbtDestory(rbt * r)$/;"	f
+rbtShow	rbt_3.c	/^void rbtShow(rbt * r)$/;"	f
+rchild	rbt_1.c	/^    rb_node* lchild, *rchild, *parent;$/;"	m	struct:rb_node	file:
+right	rbt_3.c	/^	node * parent,* left,* right;$/;"	m	struct:node	file:
+root	rbt_1.c	/^rb_node* root;$/;"	v
+root	rbt_3.c	/^	node * root;$/;"	m	struct:root_node	file:
+root_node	rbt_3.c	/^struct root_node{$/;"	s	file:
+show_rb_tree	rbt_1.c	/^void show_rb_tree(rb_node* node){$/;"	f
+value	rbt_3.c	/^	int value;	$/;"	m	struct:node	file:

@@ -1,0 +1,1017 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <malloc.h>
+#include <string.h>
+
+#define RED 1
+#define BLACK 0
+
+#define OK 1
+#define ERR 0
+#define RES int
+
+#define boolean int
+#define YES 1
+#define NO 0
+
+#define LR int
+#define LEFT 1
+#define RIGHT 0
+#define UNKNOWN 0
+
+
+typedef struct node node;
+typedef struct root_node rbt;
+typedef int COLOR;
+
+/**
+ * 节点结构体
+ */
+struct node{
+	node * parent,* left,* right;
+	COLOR color;
+	int key;
+	int value;	
+};
+
+/**
+ * 红黑树结构体
+ */
+struct root_node{
+	node * root;
+};
+
+
+/**
+ * 日志函数，直接打印一行日志
+ */
+int info(char * str){
+	printf("%s\r\n",str);
+}
+
+/**
+ * 日志函数，第一个参数为字符串数量,之后为字符串
+ */
+int infox(int argc,...)
+{
+	va_list ap;
+	int d = argc;
+	va_start(ap,argc);
+	while(d>0)
+	{
+		char * c = va_arg(ap,char * );
+		printf("%s",c);
+		d--;
+	}
+	printf("\r\n");
+	va_end(ap);
+}
+
+/**
+ * 递归打印节点
+ */
+void nodeShowRecursion(node * n)
+{
+	if(n->left != NULL)
+	{
+		nodeShowRecursion(n->left);
+	}
+	printf("[node]this %8x,  parent %8x  , left %8x  , right %8x  ,  color %d  , key %8d , value %8d ;\r\n",
+		n,n->parent,n->left,n->right,n->color,n->key,n->value);
+	if(n->right != NULL)
+	{
+		nodeShowRecursion(n->right);
+	}
+}
+
+/**
+ * 递归打印节点信息
+ */
+void nodeShowRecursion_2(node * n)
+{
+	if(n==NULL)return;
+	if(n->left != NULL)
+	{
+		nodeShowRecursion_2(n->left);
+	}
+	node * left = n->left;
+	node * right = n->right;
+	node * parent = n->parent;
+	node nn ;
+	nn.key = 0;
+	nn.value = 0;
+	nn.parent = 0;
+	if(left == NULL) left = &nn;
+	if(right == NULL)right = &nn;
+	if(parent == NULL)parent = &nn;
+	
+	printf("[node]this %4d ,  parent %4d ,  left %4d  , right %4d  ,  color %2d  ;\r\n",
+		n->key,parent->key,left->key,right->key,n->color);
+	if(n->right != NULL)
+	{
+		nodeShowRecursion_2(n->right);
+	}
+}
+
+/**
+ * 获取当前节点处于第多少层的层数
+ */
+int getDeepOfNode(node * n)
+{
+	node * point = n;
+	//根节点代表0层
+	int ceng = 0;
+	while(1){
+		if(point->parent == NULL)break;
+		point = point->parent;
+		ceng++;
+	}
+	return ceng;
+}
+
+/**
+ * 递归形式获取一个红黑树的深度
+ */
+void getDeepOfRbt(rbt * r,node * point, int * iaddr){
+	//后续遍历r的节点，分别获取每个节点的层数，返回最大层
+	if(point -> left != NULL)
+	{
+		getDeepOfRbt(r,point->left,iaddr);
+	}
+	if(point -> right != NULL)
+	{
+		getDeepOfRbt(r,point->right,iaddr);
+	}
+	int thisDeep = getDeepOfNode(point);
+	if(thisDeep > *iaddr) *iaddr = thisDeep;
+}
+
+/**
+ * 递归打印节点图形
+ */
+void nodeShowRecursionGraphic(rbt * r,node * n)
+{
+	if(r==NULL||r->root==NULL||n==NULL)return;
+	//存放红黑树的高度	
+	int rbt_deep = 0;
+	//获取红黑树的最高高度
+	getDeepOfRbt(r,r->root,&rbt_deep);
+	//获取当前节点的高度
+	int this_deep = getDeepOfNode(n); 	
+	if(n->left != NULL)
+	{
+		nodeShowRecursionGraphic(r,n->left);
+	}
+	node * left = n->left;
+	node * right = n->right;
+	node * parent = n->parent;
+	node nn ;
+	nn.key = 0;
+	nn.value = 0;
+	nn.parent = 0;
+	if(left == NULL) left = &nn;
+	if(right == NULL)right = &nn;
+	if(parent == NULL)parent = &nn;
+
+	int i = 0;
+	for(i=0;i<rbt_deep - this_deep;i++){
+		printf("\033[1;37;47m       \033[0m");
+	}
+	if(n->color == BLACK){
+		printf("\033[37;30;47m %4d[%d]\033[0m",n->key,n->color);
+	}else{
+		printf("\033[1;31;47m %4d[%d]\033[0m",n->key,n->color);
+	}
+	for(i=0;i<this_deep;i++){
+		printf("\033[1;37;47m       \033[0m");
+	}
+	printf("\r\n");
+	//printf("%4d[%d]\r\n",n->key,n->color);
+	if(n->right != NULL)
+	{
+		nodeShowRecursionGraphic(r,n->right);
+	}
+}
+
+/**
+ * 打印一颗红黑树
+ */
+void rbtShow(rbt * r)
+{
+	printf("--------------------\r\n");
+	nodeShowRecursion(r->root);
+	printf("--------------------\r\n");
+}
+
+
+/**
+ * 打印一颗红黑树
+ */
+void rbtShowKV(rbt * r)
+{
+	printf("--------------------\r\n");
+	nodeShowRecursion_2(r->root);
+	printf("--------------------\r\n");
+}
+/**
+ * 打印一颗红黑树
+ */
+void rbtShowGraphic(rbt * r)
+{
+	printf("--------------------\r\n");
+	//nodeShowRecursion(r->root);	
+	//nodeShowRecursion_2(r->root);
+	nodeShowRecursionGraphic(r,r->root);
+	printf("--------------------\r\n");
+}
+
+/**
+ * 判断该节点是否是父节点的左节点,如果为根节点，则返回否
+ */
+boolean isLeft(node * n)
+{
+	if(n->parent == NULL) return NO;
+	if(n->parent->left == n) return YES;
+	if(n->parent->right == n) return NO;
+	return NO;
+}
+/**
+ * 判断该节点是否是父节点的右节点,如果为根节点，则返回否
+ */
+boolean isRight(node * n)
+{
+	if(n->parent == NULL) return NO;
+	if(n->parent->left == n) return NO;
+	if(n->parent->right == n) return YES;
+	return NO;
+}
+
+/**
+ * 获取当前节点是左还是右
+ */
+LR getLR(node * n)
+{
+	if(isLeft(n))
+	{
+		return LEFT;
+	}
+	if(isRight(n))
+	{
+		return RIGHT;
+	}
+}
+
+/**
+ * 获得父亲节点
+ */
+node * getParent(node *n)
+{
+	if(n==NULL)return NULL;
+	return n->parent;
+}
+
+
+/**
+ * 获得叔叔节点，如果该节点为根节点，或者第一层节点，或者该节点没有叔叔节点，返回NULL
+ */
+node * getUncle(node * n)
+{
+	//如果是根节点，返回NULL
+	if(n->parent == NULL) return NULL;
+	//如果是第一层的节点，返回NULL
+	if(n->parent->parent == NULL) return NULL;
+	//第二层以下
+	//如果父节点是左分支，则返回爷爷节点的右分支
+	if(isLeft(n->parent))
+	{
+		return n->parent->parent->right;
+	}
+	//如果父节点是右分支，则返回爷爷节点的左分支
+	if(isRight(n->parent))
+	{
+		return n->parent->parent->left;
+	}
+}
+
+/**
+ * 获得爷爷节点
+ */
+node * getGrandFather(node * n)
+{
+	if(n->parent == NULL) return NULL;
+	if(n->parent->parent != NULL) return n->parent->parent;
+}
+
+
+/**
+ * 创建一个节点
+ */
+node * nodeCreate()
+{
+	node * newnode = (node *) malloc(sizeof(node));
+	memset(newnode,0,sizeof(node));
+	return newnode;
+}
+
+/**
+ * 删除一个节点
+ */
+void nodeDestory(node * oneNode)
+{
+	free(oneNode);
+}
+/**
+ * 递归删除一个子树
+ */
+void nodeDestoryRecursion(node * oneNode)
+{
+	if(oneNode->left != NULL)
+	{
+		nodeDestoryRecursion(oneNode->left);
+	}
+	if(oneNode->right != NULL)
+	{
+		nodeDestoryRecursion(oneNode->right);	
+	}
+	
+	free(oneNode);
+}
+
+/**
+ * 根据k在rbt上查询节点信息
+ */
+node * nodeSearch(rbt * r,int k)
+{
+	node * point= NULL;
+	point = r->root;
+	if(r->root==NULL)return NULL;
+	while(1)
+	{
+		//如果当前的key与目标值相等，则返回
+		if(point->key == k)
+		{
+			break;
+		}
+		//如果当前的key大于目标key，则走左分支
+		else if(point->key > k)
+		{
+			if(point->left != NULL)
+			{
+				point = point->left;
+			}else{
+				point = NULL;
+				break;
+			}
+		}
+		else if(point->key < k)
+		{
+			if(point->right != NULL)
+			{
+				point = point->right;
+			}else{
+				point = NULL;
+				break;
+			}
+		}
+	}
+	return point;
+}
+/**
+ * 创建一个红黑树结构体
+ */
+rbt * rbtCreate()
+{
+	rbt * r = (rbt *) malloc(sizeof(rbt));
+	memset(r,0,sizeof(rbt));
+	return r;
+}
+
+/**
+ * 删除一个红黑树的结构体
+ */
+void rbtDestory(rbt * r)
+{
+	nodeDestoryRecursion(r->root);
+	free(r);	
+}
+
+
+
+
+
+/**
+ * 红黑树 添加过程的自动平衡
+ */
+RES rbtAddBalance(rbt * r, node * n)
+{
+	//红黑树平衡分为五种情况
+	//CASE 1 插入的是根节点，不影响平衡
+	if(n->parent == NULL)
+	{
+		n->color = BLACK;
+		return OK;
+	}
+	//CASE 2 父节点为黑色，不影响平衡
+	if(n->parent->color == BLACK)
+	{
+		return OK;
+	}
+	//CASE 3 父节点为红色，叔叔节点为红色
+	//则把父亲节点和叔叔节点涂黑，修改爷爷节点为红色，然后对爷爷节点进行平衡
+	if(getParent(n)->color == RED && getUncle(n)!=NULL && getUncle(n)->color == RED)
+	{
+		getParent(n)->color = BLACK;
+		getUncle(n)->color  = BLACK;
+		getGrandFather(n)->color = RED;
+		rbtAddBalance(r, getGrandFather(n));
+		return OK;
+	}
+	//CASE 4 父节点为红色，叔叔节点为黑色，
+	//且新节点与父节点的方向各异（一个为左节点，一个为右节点）
+	//需要分别进行左旋或者右旋，
+	//使新节点与父节点的节点方向相同（同为左节点或者同为右节点）。之后转向5处理
+	if(getParent(n)->color == RED && ( getUncle(n)==NULL || getUncle(n)->color == BLACK ) &&
+	(getLR(n) != getLR(getParent(n)))
+	)
+	{
+		node * pre_n = n;
+		node * pre_p = getParent(n);
+		node * pre_u = getUncle(n);
+		node * pre_g = getGrandFather(n);
+		//新节点建立与祖父节点的关系
+		if(isLeft(pre_p))
+		{
+			//原父节点是左节点
+			//则建立新节点与祖父节点左分支的关系
+			pre_n->parent = pre_g;
+			pre_g->left = pre_n;
+		}else{
+			//原父节点是右节点
+			//则建立新节点与祖父节点右分支的关系
+			pre_n->parent = pre_g;
+			pre_g->right = pre_n;
+		}
+		//建立父节点与新节点的关系,并移动新节点被改动的子孩子
+		if(isLeft(pre_n)){
+			//修改后的pre_n节点是pre_g的左分支
+			//则建立pre_p节点与pre_n节点左分支的关系
+			//把pre_n的左节点赋予pre_p的右节点(实质是把大于pre_p小于pre_n的key，从pre_n的左节点划归到pre_p的右节点)
+			pre_p->parent = pre_n;
+			pre_p->right  = pre_n->left;
+			pre_n->left   = pre_p;
+		}else{
+			//修改后的pre_n节点是pre_g的右分支
+			//则建立pre_p节点与pre_n节点右分支的关系
+			//把pre_n的右节点赋予pre_p的左节点(实质是把小于pre_p大于pre_n的key,从pre_n的右节点划归到pre_p的左节点)
+			pre_p->parent = pre_n;
+			pre_p->left   = pre_n->right;
+			pre_n->right  = pre_p;
+		}
+		//从pre_p开始自动平衡
+		rbtAddBalance(r, pre_p);
+		return OK;
+	}
+	//CASE 5 父节点为红色，叔叔节点为黑色
+	//且新节点与父节点的方向相同(同为左节点或者同为右节点)
+	//则祖父节点下降，父节点上升，将祖父节点涂红，父节点涂黑
+	if(getParent(n)->color == RED && ( getUncle(n)==NULL || getUncle(n)->color == BLACK ) &&
+	(getLR(n) == getLR(getParent(n)))
+	)
+	{	//获取节点准备，如果没有则为空
+		node * pre_n = n;
+		node * pre_p = getParent(n);
+		node * pre_u = getUncle(n);
+		node * pre_g = getGrandFather(n);
+		node * pre_gp= getParent(getGrandFather(n));
+		LR pre_p_lr = getLR(pre_p);
+		//建立pre_gp与pre_p的关系
+		if(pre_gp!=NULL)	
+		{
+			if(isLeft(pre_g)){
+				//如果pre_g是pre_gp的左分支
+				//则建立pre_p和pre_gp的左分支的关系
+				pre_p->parent = pre_gp;
+				pre_gp->left = pre_p;
+			}else{
+				//如果pre_g是pre_gp的右分支 
+				//则建立pre_p和pre_gp的右分支的关系
+				pre_p->parent = pre_gp;
+				pre_gp->right = pre_p;
+				
+			}
+			
+		}else{
+			//如果pre_gp不存在，则原pre_g为rbt的根节点
+			pre_p->parent = NULL;
+			//修改r->root的值
+			r->root = pre_p;
+		}
+		//建立pre_p与pre_g的关系，并且划归分支数据
+		if(pre_p_lr == LEFT){
+			//如果在移动之前的pre_p是pre_g的左分支
+			//将pre_p的右分支赋予pre_g的左分支(实质上是把大于pre_p小于pre_g的key，从pre_p的右分支划归到pre_g的左分支)
+			//建立pre_p的右分支和pre_g的关系 
+			pre_g->left = pre_p->right;
+			if(pre_p->right!=NULL)pre_p->right->parent = pre_g;
+			pre_g->parent = pre_p;
+			pre_p->right = pre_g;
+		}else{
+			//如果在移动之前的pre_p是pre_g的右分支
+			//将pre_p的左分支赋予pre_g的右分支(实质上是把小于pre_p大于pre_g的key，从pre_p的左分支划归到pre_g的右分支)
+			//建立pre_p的左分支和pre_g的关系 
+			pre_g->right = pre_p->left;
+			if(pre_p->left!=NULL)pre_p->left->parent = pre_g;
+			pre_g->parent = pre_p;
+			pre_p->left = pre_g;
+		}
+		//重新涂色,祖父节点涂红，父节点涂黑
+		pre_g->color = RED; 
+		pre_p->color = BLACK; 
+		return OK;
+	}
+}
+
+
+
+
+/**
+ * 向一个rbt添加key是k，value是v的节点
+ */
+int rbtAdd(rbt * r , int k, int v)
+{
+	node * newnode = nodeCreate();
+	newnode->parent = NULL;
+	newnode->key = k;
+	newnode->value = v;
+	newnode->color = RED;
+	//CASE 1 向根节点添加
+	if( r->root == NULL )
+	{
+		r->root = newnode;
+		rbtAddBalance(r, newnode);
+		return OK;
+	}
+	
+	node * point= NULL;
+	point = r->root;
+	//查找到最后节点
+	while(1)
+	{
+		//如果当前的key与目标值相等，则返回
+		if(point->key == k)
+		{
+			//如果已经存在，则返回ERR
+			return ERR;
+		}
+		//如果当前的key大于目标key，则走左分支
+		else if(point->key > k)
+		{
+			//如果该节点的左节点不存在，则当前节点为最后的节点
+			if(point->left == NULL)
+			{
+				newnode->parent = point;
+				point->left = newnode;
+				//对插入节点进行平衡
+				rbtAddBalance(r, newnode);
+				return OK;
+			}
+			point = point->left;
+		}
+		else if(point->key < k)
+		{
+			//如果该节点的右节点不存在，则当前节点为最后的节点
+			if(point->right == NULL)
+			{
+				newnode->parent = point;
+				point->right = newnode;
+				//对插入节点进行平衡
+				rbtAddBalance(r, newnode);
+				return OK;
+			}
+			point = point->right;
+		}
+	}
+	return ERR;
+}
+
+/**
+ * 红黑树 删除过程的自动平衡器
+ */
+RES rbtDelBalance(rbt * r, node * n)
+{
+	
+	//CASE 1 如果被删除节点没有子节点，则直接删除
+	if(n->left == NULL && n->right ==NULL)
+	{
+		if(r->root == n){
+			//如果删除的是根节点，则直接删除，并设置r->root为NULL
+			nodeDestory(n);
+			r->root = NULL;
+			return OK;
+		}else{
+			//如果删除的不是根节点，则删除该节点，并设置父节点的指针为空
+			if(isLeft(n)){
+				//如果删除的是左节点
+				getParent(n)->left = NULL;
+				nodeDestory(n);
+				return OK;
+			}else{
+				//如果删除的是右节点
+				getParent(n)->right = NULL;
+				nodeDestory(n);
+				return OK;
+			}
+		}
+	}
+	//CASE 2 如果被删除节点有一个子节点
+	if((n->left == NULL && n->right !=NULL) || (n->left != NULL && n->right ==NULL))
+	{
+		//获取子节点
+		node * c = NULL;//子节点
+		if(n->left != NULL)
+		{
+			c = n->left;
+		}else{
+			c = n->right;
+		}
+		
+		//CASE 2.1	如果子节点是红色的
+		//隐藏含义：自身为黑色
+		//执行操作：直接删除,子节点替代自己的位置，子节点修改为黑色
+		if(c->color == RED)
+		{
+			//如果n是根节点
+			if( r->root == n )
+			{
+				//将红色子节点交给root，并且删除n，并且给红色子节点涂色为黑色
+				r->root = c;
+				r->root->color = BLACK;
+				c->parent = NULL;
+				nodeDestory(n);
+				return OK;
+			}else{
+				//如果n不是根节点
+				node * pre_p = getParent(n);
+				node * pre_x = c;
+				//将红色子节点交给pre_p
+				if(isLeft(n))
+				{
+					pre_p->left = pre_x;
+					pre_x->parent = pre_p;
+				}else{
+					pre_p->right = pre_x;
+					pre_x->parent = pre_p;
+				}
+				//删除n，并且给红色子节点涂色为黑色
+				pre_x->color = BLACK;
+				nodeDestory(n);
+				return OK;
+			}
+		}
+		
+		//CASE 2.2  如果子节点是黑色的
+		//隐藏含义：无
+		//执行操作：删除该节点,将子节点代替它的位置,在子节点树上找一个合适的位置涂黑
+		if(c->color == BLACK)
+		{
+			//DOSTH 删除节点的操作
+			//如果n是根节点
+			if( r->root == n )
+			{
+				//将子节点交给root，并且删除n，并且给红色子节点涂色为黑色
+				r->root = c;
+				r->root->color = BLACK;
+				c->parent = NULL;
+				nodeDestory(n);
+				return OK;//单支根节点，直接删除即可
+			}else{
+				//如果n不是根节点
+				node * pre_p = getParent(n);
+				node * pre_x = c;
+				//将子节点交给pre_p
+				if(isLeft(n))
+				{
+					pre_p->left = pre_x;
+					pre_x->parent = pre_p;
+				}else{
+					pre_p->right = pre_x;
+					pre_x->parent = pre_p;
+				}
+				COLOR n_color = n->color;
+				//删除n节点
+				nodeDestory(n);
+				//如果n的颜色是红色的，则直接返回成功
+				if(n_color == RED)
+				return OK;
+				
+			}
+			//DOSTH 删除节点后自下向上进行平衡
+			//替换后，原节点n被销毁，c的节点被替代到了n上
+			//循环处理,在替换后的子节点树上找一个合适的位置涂黑
+			//以下，设c的节点被替代到n上后，就是n
+			n = c;
+			while(1)
+			{
+				//DOSTH 如果已经自下向上处理到了根节点，则修改根节点为红色，结束
+				if(r->root == n)
+				{
+					r->root->color = BLACK;
+					return OK;
+				}	
+				//在前面的分支中，如果r->root == n ,会直接修改颜色并退出
+				//因此，此处必定不是根节点，n->parent是一定存在的
+				//p为父亲节点
+				node * p = NULL;
+				p = n->parent;
+				//w为叔叔节点
+				node * w = NULL;
+				if(isLeft(n)){
+					//如果n是左节点，则叔叔节点为父节点的右节点
+					w = n->parent->right;
+				}else{
+					//如果n是右节点，则叔叔节点为父节点的左节点
+					w = n->parent->left;
+				}
+				//爷爷节点不一定存在
+				node * gp = n->parent->parent;
+				
+				//CASE 2.2.1  替换后n的兄弟节点w为红色
+				//隐藏含义：n的兄弟节点w的儿子都是黑色(一个或者两个儿子)
+				//			父亲节点p 是黑色
+				//执行操作：需要进行一次左旋（将被删除节点的分支长度+1），
+				//改变旋转的两个节点的颜色,转变情况为2，3，4
+				if(w->color == RED)
+				{
+					//对n的左分支与右分支分别处理
+					if(isLeft(n)){
+						//n为左分支，则左旋，并且改变p与w的颜色(两者颜色不同)
+						//左旋即为：1、w的左节点挂到p的右节点
+						//			2、p的parent指向w
+						//			3、w的左节点指向p
+						p->right = w->left;
+						p->parent = w;
+						w->left = p;
+					}else{
+						//n为右分支，则右旋，并且改变p与w的颜色(两者颜色不同)
+						//右旋即为：1、w的右节点挂到p的左节点
+						//			2、p的parent指向w
+						//			3、w的右节点指向p
+						p->left = w->right;
+						p->parent = w;
+						w->right = p;
+					}	
+					//颜色互换
+					COLOR tmp;
+					tmp = w->color;
+					w->color = p->color;
+					p->color = tmp;
+					//建立w与gp的关联
+					if(gp == NULL){
+						//原p节点为根节点
+						r->root = w;
+						w->parent = NULL;
+					}else if(gp!=NULL && gp->left == p){
+						gp->left = w;
+					}else if(gp!=NULL && gp->right == p){
+						gp->right = w;
+					}
+					//n = n;
+					continue;
+				}
+				//CASE 2.2.2 替换后n的兄弟节点w为黑色,且w的子节点都是黑色或者NIL
+				//隐藏含义：n和w的父节点可红可黑，左侧比右侧少一个黑
+				//执行操作，w颜色修改为红色，则左右平衡，之后以p为起始，重新开始平衡。
+				//			操作含义为：尝试将整个分支的黑节点数-1,并向上递归
+				if(
+					w->color == BLACK 
+					&& (w->left == NULL ||  w->left->color == BLACK )
+					&& (w->right== NULL ||  w->right->color == BLACK ) 
+				)
+				{
+					w->color = RED;
+					n = p;
+					continue;	
+				}
+				//CASE 2.2.3 替换后n的兄弟节点w为黑色,且w的同向子节点为黑色，异向孩子为红色
+				//隐藏含义：无
+				//执行操作：对w和异向儿子进行正旋，交换颜色，转化为4处理
+				//			
+				if(w->color ==BLACK){
+					//如果替换后的兄弟节点w为黑色
+					LR w_lr = getLR(w);
+					if(w_lr == RIGHT){
+						//n是父节点的左节点,w是父节点的右节点
+						//如果w的同向子节点为黑色，异向子节点为红色
+						if(
+							(w->right==NULL || w->right->color == BLACK) 
+							&& (w->left !=NULL && w->left->color == RED ))
+						{
+							node * w_left = w->left;
+							//则对w的左节点和w进行右旋
+							p->right = w_left;
+							w_left->parent = p;
+							w->parent = w_left;
+							w->left = w_left->right;
+							w_left->right->parent = w;
+							w_left->right = w;
+							//并且交换w与w_left的颜色
+							COLOR tmp;
+							tmp = w->color;
+							w->color = w_left->color;
+							w_left->color = tmp;
+							//之后n不变，继续处理
+							continue;
+						}//其他情况，交给 2.2.2或者2.2.4处理
+					}else{
+						//n是父节点的右节点,w是父节点的左节点
+						//如果w的同向子节点为黑色，异向子节点为红色	
+						if(
+							(w->left==NULL || w->left->color == BLACK) 
+							&& (w->right !=NULL && w->right->color == RED ))
+						{
+							node * w_right = w->right;
+							//则对w的右节点和w进行左旋
+							p->left= w_right;
+							w_right->parent = p;
+							w->parent = w_right;
+							w->right= w_right->left;
+							w_right->left->parent = w;
+							w_right->left = w;
+							//并且交换w与w_left的颜色
+							COLOR tmp;
+							tmp = w->color;
+							w->color = w_right->color;
+							w_right->color = tmp;
+							//之后n不变，继续处理
+							continue;
+						}//其他情况，交给 2.2.2或者2.2.4处理
+
+					}
+				}
+				//CASE 2.2.4 替换后n的兄弟节点w为黑色,且w的同向子节点为红色
+				//隐藏含义：n端黑色节点少1，需要根据n所在的位置进行左旋或者右旋，然后反方向弥补一个黑色，则可以平衡
+				//执行操作：交换p和w的颜色，进行w反向旋转，然后将w同向子节点置黑，完成平衡
+				if(w->color ==BLACK){
+					//如果替换后的兄弟节点w为黑色
+					LR w_lr = getLR(w);
+					if(w_lr == RIGHT){
+						//n是父节点的左节点,w是父节点的右节点
+						//如果w的同向子节点为红色
+						if(w->right!=NULL && w->right->color == RED)
+						{
+							//交换p和w的颜色
+							COLOR tmp;
+							tmp = w->color;
+							w->color = p->color;
+							p->color = tmp;
+							//进行w反向旋转,此处w是右向，则左旋
+							node * w_left = w->left;
+
+							p->right = w_left;
+							w_left->parent = p;
+							
+							w->left = p;
+							p->parent = w;
+	
+							//建立w与gp的关联
+							if(gp == NULL){
+								//原p节点为根节点
+								r->root = w;
+								w->parent = NULL;
+							}else if(gp!=NULL && gp->left == p){
+								gp->left = w;
+							}else if(gp!=NULL && gp->right == p){
+								gp->right = w;
+							}
+							//然后将w同向子节点置黑
+							w->right->color = BLACK;
+							//完成左右平衡
+							return OK;
+						}//交给其他分支处理
+					}else{
+						//n是父节点的右节点,w是父节点的左节点
+						//如果w的同向子节点为红色
+						if(w->left!=NULL && w->left->color == RED)
+						{
+							//交换p和w的颜色
+							COLOR tmp;
+							tmp = w->color;
+							w->color = p->color;
+							p->color = tmp;
+							//进行w反向旋转,此处w是左向，则右旋
+							node * w_right = w->right;
+
+							p->left = w_right;
+							w_right->parent = p;
+							
+							w->right = p;
+							p->parent = w;
+	
+							//建立w与gp的关联
+							if(gp == NULL){
+								//原p节点为根节点
+								r->root = w;
+								w->parent = NULL;
+							}else if(gp!=NULL && gp->left == p){
+								gp->left = w;
+							}else if(gp!=NULL && gp->right == p){
+								gp->right = w;
+							}
+							//然后将w同向子节点置黑
+							w->right->color = BLACK;
+							//完成左右平衡
+							return OK;
+						}//交给其他分支处理
+
+					}
+				}
+			}
+		}
+	}
+	//CASE 3 如果被删除节点有两个子节点
+	if(n->left != NULL && n->right !=NULL)
+	{
+		//在右子树上找到最小的替换节点y，x和y交换除了颜色外的数据
+		node * y = n->right;
+		while(y->left != NULL)
+		{
+			y = y->left;
+		}
+		n->key = y->key;
+		n->value = y->value;
+		//转化为删除y的问题?(y只有右节点)
+		return rbtDelBalance(r,y);	
+	}
+}
+
+/**
+ * 从rbt中删除一个key为k的节点
+ */
+RES rbtDel(rbt * r,int k)
+{
+	node * y = nodeSearch(r,k);
+	if(y == NULL) return OK;
+	return rbtDelBalance(r,y);
+}
+
+
+
+int main(int argc,char ** argv)
+{
+	info("红黑树程序开始");
+	infox(4,"作者：","暴龙 ","邮箱:","kanmars@kanmars.ra");
+	infox(3,"参考资料：","红黑树从头至尾插入删除全程展示","http://blog.csdn.net/v_july_v/article/details/6284050");
+	infox(3,"参考资料：","红黑树透彻了解","http://blog.chinaunix.net/uid-26575352-id-3061918.html");
+	infox(3,"参考资料：","红黑树删除","http://blog.csdn.net/spch2008/article/details/9338923");
+	//创建一个root指针
+	rbt * r = rbtCreate();
+	//添加一个根节点
+	RES res = 0;
+	res = rbtAdd(r,4,11);
+	res = rbtAdd(r,3,33);
+	res = rbtAdd(r,2,22);
+	res = rbtAdd(r,5,55);
+	res = rbtAdd(r,16,1616);
+	res = rbtAdd(r,12,1212);
+	res = rbtAdd(r,14,1414);
+	res = rbtAdd(r,6,66);
+	res = rbtAdd(r,11,1111);
+	res = rbtAdd(r,1,11);
+	res = rbtAdd(r,99,9999);
+	res = rbtAdd(r,8,88);
+	res = rbtAdd(r,7,77);
+	res = rbtAdd(r,9,99);
+	res = rbtAdd(r,13,1313);
+	res = rbtAdd(r,17,1717);
+	res = rbtAdd(r,15,1515);
+	res = rbtAdd(r,18,1818);
+	res = rbtAdd(r,20,2020);
+	res = rbtAdd(r,21,2121);
+	res = rbtAdd(r,30,3030);
+	res = rbtAdd(r,29,2929);
+	res = rbtAdd(r,25,2525);
+	res = rbtAdd(r,22,2222);
+	res = rbtAdd(r,23,2323);
+	res = rbtAdd(r,26,2626);
+	res = rbtAdd(r,50,5050);
+	res = rbtAdd(r,35,3535);
+	res = rbtAdd(r,40,4040);
+	res = rbtAdd(r,41,4141);
+	res = rbtAdd(r,45,4545);
+	res = rbtAdd(r,43,4343);
+	int i = 0;
+	for(i=0;i<argc;i++){
+		int num = atoi(argv[i]);
+		rbtDel(r,num);
+		rbtShow(r);
+	}
+	int rbtDeep = 0;
+	getDeepOfRbt(r,r->root, &rbtDeep);
+	printf("该树的层数为 %8d\r\n",rbtDeep);
+	rbtShowGraphic(r);
+//	node * n_2 =  nodeSearch(r,11);
+//	printf("%d\r\n",n_2->value);
+}
+
